@@ -1,8 +1,9 @@
-console.log("盗賊ゲーム 運営補助ツール Ver.0.4");
+console.log("盗賊ゲーム 運営補助ツール Ver.0.5");
 
 // 画面
 const setupScreen = document.getElementById("setupScreen");
 const roundScreen = document.getElementById("roundScreen");
+const confirmScreen = document.getElementById("confirmScreen");
 const resultScreen = document.getElementById("resultScreen");
 const finalScreen = document.getElementById("finalScreen");
 
@@ -14,7 +15,9 @@ const playerNameInputs = document.getElementById("playerNameInputs");
 
 // ボタン
 const startGameButton = document.getElementById("startGameButton");
-const calculateResultButton = document.getElementById("calculateResultButton");
+const checkInputButton = document.getElementById("checkInputButton");
+const backToRoundButton = document.getElementById("backToRoundButton");
+const confirmCalculateButton = document.getElementById("confirmCalculateButton");
 const nextRoundButton = document.getElementById("nextRoundButton");
 const resetGameButton = document.getElementById("resetGameButton");
 
@@ -22,6 +25,7 @@ const resetGameButton = document.getElementById("resetGameButton");
 const roundDisplay = document.getElementById("roundDisplay");
 const roundStatusLabel = document.getElementById("roundStatusLabel");
 const actionTable = document.getElementById("actionTable");
+const confirmActionList = document.getElementById("confirmActionList");
 const roundResultText = document.getElementById("roundResultText");
 const roundLogList = document.getElementById("roundLogList");
 const currentRankingList = document.getElementById("currentRankingList");
@@ -33,7 +37,8 @@ let game = {
   currentRound: 1,
   maxRound: 3,
   initialPoints: 10,
-  history: []
+  history: [],
+  pendingActions: []
 };
 
 const actionLabels = {
@@ -61,6 +66,7 @@ function getNumber(value, fallback, min) {
 function showScreen(targetScreen) {
   setupScreen.classList.remove("active");
   roundScreen.classList.remove("active");
+  confirmScreen.classList.remove("active");
   resultScreen.classList.remove("active");
   finalScreen.classList.remove("active");
 
@@ -251,6 +257,23 @@ function validateRoundActions(actions) {
   return true;
 }
 
+// 入力確認画面を作る
+function renderConfirmScreen(actions) {
+  confirmActionList.innerHTML = "";
+
+  actions.forEach(function (action) {
+    const li = document.createElement("li");
+
+    if (action.action === "steal") {
+      li.textContent = action.playerName + "：" + action.actionLabel + " → " + action.targetName;
+    } else {
+      li.textContent = action.playerName + "：" + action.actionLabel;
+    }
+
+    confirmActionList.appendChild(li);
+  });
+}
+
 // ラウンド結果を計算する
 function calculateRoundResults(actions) {
   const logs = [];
@@ -424,6 +447,7 @@ startGameButton.addEventListener("click", function () {
   game.maxRound = getNumber(roundCountInput.value, 3, 1);
   game.initialPoints = getNumber(initialPointsInput.value, 10, 0);
   game.history = [];
+  game.pendingActions = [];
 
   updateRoundDisplay();
   renderRoundScreen();
@@ -431,15 +455,35 @@ startGameButton.addEventListener("click", function () {
   showScreen(roundScreen);
 });
 
-// 結果計算
-calculateResultButton.addEventListener("click", function () {
+// 入力内容を確認
+checkInputButton.addEventListener("click", function () {
   const actions = getRoundActions();
 
   if (!validateRoundActions(actions)) {
     return;
   }
 
-  const logs = calculateRoundResults(actions);
+  game.pendingActions = actions;
+  renderConfirmScreen(actions);
+  showScreen(confirmScreen);
+});
+
+// 入力に戻る
+backToRoundButton.addEventListener("click", function () {
+  showScreen(roundScreen);
+});
+
+// この内容で確定
+confirmCalculateButton.addEventListener("click", function () {
+  if (!game.pendingActions || game.pendingActions.length === 0) {
+    alert("確定する入力内容がありません。");
+    showScreen(roundScreen);
+    return;
+  }
+
+  const logs = calculateRoundResults(game.pendingActions);
+
+  game.pendingActions = [];
 
   renderResultScreen(logs);
   showScreen(resultScreen);
@@ -463,6 +507,7 @@ nextRoundButton.addEventListener("click", function () {
 resetGameButton.addEventListener("click", function () {
   game.currentRound = 1;
   game.history = [];
+  game.pendingActions = [];
   showScreen(setupScreen);
 });
 
