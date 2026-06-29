@@ -1,4 +1,4 @@
-console.log("盗賊ゲーム 運営補助ツール Ver.0.5");
+console.log("盗賊ゲーム 運営補助ツール Ver.0.6");
 
 // 画面
 const setupScreen = document.getElementById("setupScreen");
@@ -30,6 +30,8 @@ const roundResultText = document.getElementById("roundResultText");
 const roundLogList = document.getElementById("roundLogList");
 const currentRankingList = document.getElementById("currentRankingList");
 const finalRankingList = document.getElementById("finalRankingList");
+const historyDisplay = document.getElementById("historyDisplay");
+const finalHistoryDisplay = document.getElementById("finalHistoryDisplay");
 
 // ゲーム状態
 let game = {
@@ -355,16 +357,18 @@ function calculateRoundResults(actions) {
     logs.push("このラウンドではポイント変動がありませんでした。");
   }
 
+  const rankingSnapshot = getSortedPlayers().map(function (player) {
+    return {
+      name: player.name,
+      points: player.points
+    };
+  });
+
   const historyItem = {
     round: game.currentRound,
     actions: actions,
     logs: logs,
-    ranking: game.players.map(function (player) {
-      return {
-        name: player.name,
-        points: player.points
-      };
-    })
+    ranking: rankingSnapshot
   };
 
   game.history.push(historyItem);
@@ -386,6 +390,7 @@ function renderResultScreen(logs) {
   });
 
   renderRanking(currentRankingList);
+  renderHistory(historyDisplay);
 
   if (game.currentRound >= game.maxRound) {
     nextRoundButton.textContent = "最終結果へ";
@@ -394,15 +399,20 @@ function renderResultScreen(logs) {
   }
 }
 
-// ランキングを表示する
-function renderRanking(listElement) {
-  const sortedPlayers = [...game.players].sort(function (a, b) {
+// 順位順に並べたプレイヤー一覧を返す
+function getSortedPlayers() {
+  return [...game.players].sort(function (a, b) {
     if (b.points !== a.points) {
       return b.points - a.points;
     }
 
     return a.order - b.order;
   });
+}
+
+// ランキングを表示する
+function renderRanking(listElement) {
+  const sortedPlayers = getSortedPlayers();
 
   listElement.innerHTML = "";
 
@@ -413,15 +423,96 @@ function renderRanking(listElement) {
   });
 }
 
+// 履歴を表示する
+function renderHistory(containerElement) {
+  containerElement.innerHTML = "";
+
+  if (game.history.length === 0) {
+    const emptyText = document.createElement("p");
+    emptyText.className = "help-text";
+    emptyText.textContent = "まだ履歴はありません。";
+    containerElement.appendChild(emptyText);
+    return;
+  }
+
+  game.history.forEach(function (historyItem) {
+    const historyCard = document.createElement("div");
+    historyCard.className = "history-item";
+
+    const title = document.createElement("h4");
+    title.textContent = "第" + historyItem.round + "ラウンド";
+    historyCard.appendChild(title);
+
+    const actionBlock = document.createElement("div");
+    actionBlock.className = "history-block";
+
+    const actionTitle = document.createElement("p");
+    actionTitle.className = "history-block-title";
+    actionTitle.textContent = "行動";
+    actionBlock.appendChild(actionTitle);
+
+    const actionList = document.createElement("ul");
+
+    historyItem.actions.forEach(function (action) {
+      const li = document.createElement("li");
+
+      if (action.action === "steal") {
+        li.textContent = action.playerName + "：" + action.actionLabel + " → " + action.targetName;
+      } else {
+        li.textContent = action.playerName + "：" + action.actionLabel;
+      }
+
+      actionList.appendChild(li);
+    });
+
+    actionBlock.appendChild(actionList);
+    historyCard.appendChild(actionBlock);
+
+    const resultBlock = document.createElement("div");
+    resultBlock.className = "history-block";
+
+    const resultTitle = document.createElement("p");
+    resultTitle.className = "history-block-title";
+    resultTitle.textContent = "処理結果";
+    resultBlock.appendChild(resultTitle);
+
+    const resultList = document.createElement("ul");
+
+    historyItem.logs.forEach(function (log) {
+      const li = document.createElement("li");
+      li.textContent = log;
+      resultList.appendChild(li);
+    });
+
+    resultBlock.appendChild(resultList);
+    historyCard.appendChild(resultBlock);
+
+    const rankingBlock = document.createElement("div");
+    rankingBlock.className = "history-block";
+
+    const rankingTitle = document.createElement("p");
+    rankingTitle.className = "history-block-title";
+    rankingTitle.textContent = "ラウンド終了時ランキング";
+    rankingBlock.appendChild(rankingTitle);
+
+    const rankingList = document.createElement("ol");
+
+    historyItem.ranking.forEach(function (player) {
+      const li = document.createElement("li");
+      li.textContent = player.name + "：" + player.points + " pt";
+      rankingList.appendChild(li);
+    });
+
+    rankingBlock.appendChild(rankingList);
+    historyCard.appendChild(rankingBlock);
+
+    containerElement.appendChild(historyCard);
+  });
+}
+
 // 最終結果を表示する
 function renderFinalResult() {
-  const sortedPlayers = [...game.players].sort(function (a, b) {
-    if (b.points !== a.points) {
-      return b.points - a.points;
-    }
-
-    return a.order - b.order;
-  });
+  const sortedPlayers = getSortedPlayers();
 
   const medals = ["🥇", "🥈", "🥉"];
 
@@ -433,6 +524,8 @@ function renderFinalResult() {
     li.textContent = medal + " " + player.name + "：" + player.points + " pt";
     finalRankingList.appendChild(li);
   });
+
+  renderHistory(finalHistoryDisplay);
 }
 
 // プレイヤー人数変更時に名前入力欄を作り直す
