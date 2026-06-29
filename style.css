@@ -7,6 +7,7 @@
   --accent: #7dd3fc;
   --accent-strong: #38bdf8;
   --border: #2d3547;
+  --warning: #facc15;
 }
 
 * {
@@ -92,6 +93,10 @@ body {
 
 .card h3 {
   margin-top: 0;
+}
+
+.warning-card {
+  border-color: rgba(250, 204, 21, 0.5);
 }
 
 .help-text {
