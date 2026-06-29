@@ -191,6 +191,10 @@ body {
   border-color: rgba(125, 211, 252, 0.38);
 }
 
+.promotion-card {
+  border-color: rgba(250, 204, 21, 0.34);
+}
+
 .help-text {
   color: var(--sub-text);
   margin: 0 0 12px;
@@ -380,6 +384,54 @@ button:disabled {
   line-height: 2;
 }
 
+.promotion-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.promotion-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.38);
+}
+
+.promotion-option input {
+  width: auto;
+  margin-top: 4px;
+}
+
+.promotion-option strong {
+  color: var(--text);
+}
+
+.promotion-option span {
+  display: block;
+  margin-top: 4px;
+  color: var(--sub-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.promotion-result {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  background: rgba(250, 204, 21, 0.08);
+  color: var(--sub-text);
+  line-height: 1.7;
+}
+
+.promotion-result:empty {
+  display: none;
+}
+
 .history-list {
   display: flex;
   flex-direction: column;
@@ -424,7 +476,8 @@ button:disabled {
 
 @media (max-width: 900px) {
   .card-grid,
-  .player-name-grid {
+  .player-name-grid,
+  .promotion-options {
     grid-template-columns: repeat(2, 1fr);
   }
 
