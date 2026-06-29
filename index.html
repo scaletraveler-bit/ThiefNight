@@ -10,7 +10,7 @@
   <header class="app-header">
     <div>
       <h1>盗賊ゲーム 運営補助ツール</h1>
-      <p>ゲームマスター専用 / Ver.0.3 設定反映</p>
+      <p>ゲームマスター専用 / Ver.0.4 ポイント計算</p>
     </div>
   </header>
 
@@ -52,6 +52,17 @@
         <div id="playerNameInputs" class="player-name-grid"></div>
       </div>
 
+      <div class="card">
+        <h3>計算ルール</h3>
+        <ul class="rule-list">
+          <li>奪う → 対象が「貯める」なら、奪った側 +10 / 対象 -10</li>
+          <li>奪う → 対象が「守る」なら、奪った側 -5 / 守った側 +5</li>
+          <li>奪う → 対象も「奪う」なら、変動なし</li>
+          <li>貯める → 誰にも奪われなければ +5</li>
+          <li>守る → 誰にも奪われなければ変動なし</li>
+        </ul>
+      </div>
+
       <div class="button-area">
         <button id="startGameButton" class="primary-button">ゲーム開始</button>
       </div>
@@ -71,19 +82,19 @@
       <div id="actionTable" class="action-table"></div>
 
       <div class="button-area">
-        <button id="calculateResultButton" class="primary-button">入力内容を確認</button>
+        <button id="calculateResultButton" class="primary-button">結果計算</button>
       </div>
     </section>
 
     <section id="resultScreen" class="screen">
       <div class="screen-header">
         <h2>③ 結果画面</h2>
-        <span class="status-label">ラウンド確認</span>
+        <span class="status-label">ラウンド結果</span>
       </div>
 
       <div class="card">
-        <h3>今回の入力内容</h3>
-        <p id="roundResultText" class="help-text">ここに入力内容が表示されます。</p>
+        <h3>今回の処理結果</h3>
+        <p id="roundResultText" class="help-text">ここに処理結果が表示されます。</p>
         <ul id="roundLogList" class="log-list"></ul>
       </div>
 
