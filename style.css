@@ -7,6 +7,7 @@
   --accent: #7dd3fc;
   --accent-strong: #38bdf8;
   --border: #2d3547;
+  --warning: #facc15;
 }
 
 * {
@@ -94,6 +95,11 @@ body {
   margin-top: 0;
 }
 
+.help-text {
+  color: var(--sub-text);
+  margin-top: 0;
+}
+
 label {
   display: block;
   margin-bottom: 8px;
@@ -110,6 +116,11 @@ select {
   background: #0f172a;
   color: var(--text);
   font-size: 16px;
+}
+
+select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .player-name-grid {
@@ -179,6 +190,17 @@ button:hover {
   font-size: 14px;
   background: transparent;
   border: none;
+}
+
+.player-point {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.log-list {
+  margin: 12px 0 0;
+  padding-left: 24px;
+  line-height: 2;
 }
 
 .ranking-list {
