@@ -1,6 +1,6 @@
-console.log("盗賊ゲーム 運営補助ツール Ver.1.0");
+console.log("盗賊ゲーム 運営補助ツール Ver.1.1");
 
-const STORAGE_KEY = "thief_game_save_v10";
+const STORAGE_KEY = "thief_game_save_v11";
 
 // 画面
 const setupScreen = document.getElementById("setupScreen");
@@ -22,6 +22,7 @@ const deleteSavedButton = document.getElementById("deleteSavedButton");
 const checkInputButton = document.getElementById("checkInputButton");
 const backToRoundButton = document.getElementById("backToRoundButton");
 const confirmCalculateButton = document.getElementById("confirmCalculateButton");
+const confirmPromotionButton = document.getElementById("confirmPromotionButton");
 const nextRoundButton = document.getElementById("nextRoundButton");
 const resetGameButton = document.getElementById("resetGameButton");
 const copyDiscordTextButton = document.getElementById("copyDiscordTextButton");
@@ -34,6 +35,8 @@ const actionTable = document.getElementById("actionTable");
 const confirmActionList = document.getElementById("confirmActionList");
 const roundResultText = document.getElementById("roundResultText");
 const roundLogList = document.getElementById("roundLogList");
+const promotionOptions = document.getElementById("promotionOptions");
+const promotionResult = document.getElementById("promotionResult");
 const currentRankingList = document.getElementById("currentRankingList");
 const finalRankingList = document.getElementById("finalRankingList");
 const historyDisplay = document.getElementById("historyDisplay");
@@ -97,7 +100,7 @@ function getSavedData() {
 function saveGame() {
   try {
     const saveData = {
-      version: "1.0",
+      version: "1.1",
       savedAt: new Date().toISOString(),
       game: game
     };
@@ -386,7 +389,8 @@ function getRoundActions() {
       action: actionSelect.value,
       actionLabel: actionLabels[actionSelect.value] || "未選択",
       targetId: targetSelect.value ? Number(targetSelect.value) : null,
-      targetName: targetPlayer ? targetPlayer.name : ""
+      targetName: targetPlayer ? targetPlayer.name : "",
+      resultSummary: ""
     };
   });
 }
@@ -432,6 +436,7 @@ function calculateRoundResults(actions) {
   const actionMap = new Map();
 
   actions.forEach(function (action) {
+    action.resultSummary = "";
     actionMap.set(action.playerId, action);
   });
 
@@ -460,6 +465,7 @@ function calculateRoundResults(actions) {
     if (targetAction.action === "save") {
       thief.points += 10;
       target.points -= 10;
+      action.resultSummary = "奪うことに成功（+10 pt）";
 
       logs.push(
         thief.name + " は " + target.name + " から奪うことに成功。"
@@ -470,6 +476,7 @@ function calculateRoundResults(actions) {
     if (targetAction.action === "guard") {
       thief.points -= 5;
       target.points += 5;
+      action.resultSummary = "守られて失敗（-5 pt）";
 
       logs.push(
         thief.name + " は " + target.name + " を狙ったが、守られた。"
@@ -478,6 +485,8 @@ function calculateRoundResults(actions) {
     }
 
     if (targetAction.action === "steal") {
+      action.resultSummary = "相手も奪う行動だったため変動なし";
+
       logs.push(
         thief.name + " は " + target.name + " を狙ったが、相手も奪う行動だったため変動なし。"
       );
@@ -494,11 +503,21 @@ function calculateRoundResults(actions) {
 
     if (action.action === "save" && stealCount === 0) {
       player.points += 5;
+      action.resultSummary = "安全に貯めた（+5 pt）";
       logs.push(player.name + " は安全に貯めた。+5 pt");
     }
 
+    if (action.action === "save" && stealCount > 0) {
+      action.resultSummary = "奪われた（-" + (10 * stealCount) + " pt）";
+    }
+
     if (action.action === "guard" && stealCount === 0) {
+      action.resultSummary = "誰にも狙われず変動なし";
       logs.push(player.name + " は守ったが、誰にも狙われなかった。変動なし。");
+    }
+
+    if (action.action === "guard" && stealCount > 0) {
+      action.resultSummary = "防衛成功（+" + (5 * stealCount) + " pt）";
     }
   });
 
@@ -517,12 +536,20 @@ function calculateRoundResults(actions) {
     round: game.currentRound,
     actions: actions,
     logs: logs,
+    publicity: [],
     ranking: rankingSnapshot
   };
 
   game.history.push(historyItem);
 
   return logs;
+}
+
+// 現在ラウンドの履歴を取得する
+function getCurrentHistoryItem() {
+  return game.history.find(function (historyItem) {
+    return historyItem.round === game.currentRound;
+  });
 }
 
 // 結果画面を作る
@@ -538,6 +565,7 @@ function renderResultScreen(logs) {
     roundLogList.appendChild(li);
   });
 
+  renderPromotionPanel();
   renderRanking(currentRankingList);
   renderHistory(historyDisplay);
 
@@ -546,6 +574,137 @@ function renderResultScreen(logs) {
   } else {
     nextRoundButton.textContent = "次のラウンドへ";
   }
+}
+
+// 喧伝パネルを表示する
+function renderPromotionPanel() {
+  promotionOptions.innerHTML = "";
+  promotionResult.innerHTML = "";
+
+  const historyItem = getCurrentHistoryItem();
+
+  if (!historyItem) {
+    promotionOptions.innerHTML = "<p class='help-text'>喧伝できるラウンド結果がありません。</p>";
+    confirmPromotionButton.disabled = true;
+    return;
+  }
+
+  if (!historyItem.publicity) {
+    historyItem.publicity = [];
+  }
+
+  if (historyItem.publicity.length > 0) {
+    confirmPromotionButton.disabled = true;
+
+    const title = document.createElement("p");
+    title.className = "history-block-title";
+    title.textContent = "喧伝済み";
+    promotionResult.appendChild(title);
+
+    const list = document.createElement("ul");
+    list.className = "log-list";
+
+    historyItem.publicity.forEach(function (item) {
+      const li = document.createElement("li");
+      li.textContent =
+        item.playerName + " が喧伝しました。行動：" + item.actionLabel
+        + " / 結果：" + item.resultSummary
+        + " / 喧伝報酬：+1 pt";
+      list.appendChild(li);
+    });
+
+    promotionResult.appendChild(list);
+    return;
+  }
+
+  confirmPromotionButton.disabled = false;
+
+  historyItem.actions.forEach(function (action) {
+    const label = document.createElement("label");
+    label.className = "promotion-option";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "promotion-checkbox";
+    checkbox.value = action.playerId;
+
+    const textWrap = document.createElement("div");
+
+    const name = document.createElement("strong");
+    name.textContent = action.playerName;
+
+    const detail = document.createElement("span");
+    detail.textContent =
+      "公開内容：行動「" + action.actionLabel + "」 / 結果「" + action.resultSummary + "」";
+
+    textWrap.appendChild(name);
+    textWrap.appendChild(detail);
+
+    label.appendChild(checkbox);
+    label.appendChild(textWrap);
+
+    promotionOptions.appendChild(label);
+  });
+}
+
+// 喧伝を確定する
+function applyPromotion() {
+  const historyItem = getCurrentHistoryItem();
+
+  if (!historyItem) {
+    alert("喧伝できるラウンド結果がありません。");
+    return;
+  }
+
+  if (!historyItem.publicity) {
+    historyItem.publicity = [];
+  }
+
+  if (historyItem.publicity.length > 0) {
+    alert("このラウンドの喧伝はすでに確定済みです。");
+    return;
+  }
+
+  const checkedBoxes = document.querySelectorAll(".promotion-checkbox:checked");
+
+  if (checkedBoxes.length === 0) {
+    alert("喧伝するプレイヤーを選択してください。");
+    return;
+  }
+
+  checkedBoxes.forEach(function (checkbox) {
+    const playerId = Number(checkbox.value);
+    const player = findPlayer(playerId);
+    const action = historyItem.actions.find(function (item) {
+      return item.playerId === playerId;
+    });
+
+    if (!player || !action) {
+      return;
+    }
+
+    player.points += 1;
+
+    historyItem.publicity.push({
+      playerId: player.id,
+      playerName: player.name,
+      actionLabel: action.actionLabel,
+      resultSummary: action.resultSummary,
+      bonus: 1
+    });
+  });
+
+  historyItem.ranking = getSortedPlayers().map(function (player) {
+    return {
+      name: player.name,
+      points: player.points
+    };
+  });
+
+  renderPromotionPanel();
+  renderRanking(currentRankingList);
+  renderHistory(historyDisplay);
+  saveGame();
 }
 
 // 順位順に並べたプレイヤー一覧を返す
@@ -636,6 +795,30 @@ function renderHistory(containerElement) {
     resultBlock.appendChild(resultList);
     historyCard.appendChild(resultBlock);
 
+    if (historyItem.publicity && historyItem.publicity.length > 0) {
+      const publicityBlock = document.createElement("div");
+      publicityBlock.className = "history-block";
+
+      const publicityTitle = document.createElement("p");
+      publicityTitle.className = "history-block-title";
+      publicityTitle.textContent = "喧伝";
+      publicityBlock.appendChild(publicityTitle);
+
+      const publicityList = document.createElement("ul");
+
+      historyItem.publicity.forEach(function (item) {
+        const li = document.createElement("li");
+        li.textContent =
+          item.playerName + " が喧伝。行動：" + item.actionLabel
+          + " / 結果：" + item.resultSummary
+          + " / +1 pt";
+        publicityList.appendChild(li);
+      });
+
+      publicityBlock.appendChild(publicityList);
+      historyCard.appendChild(publicityBlock);
+    }
+
     const rankingBlock = document.createElement("div");
     rankingBlock.className = "history-block";
 
@@ -697,6 +880,19 @@ function buildDiscordResultText() {
       lines.push("・" + log);
     });
 
+    if (historyItem.publicity && historyItem.publicity.length > 0) {
+      lines.push("");
+      lines.push("喧伝");
+      historyItem.publicity.forEach(function (item) {
+        lines.push(
+          "・" + item.playerName + " が喧伝"
+          + " / 行動：" + item.actionLabel
+          + " / 結果：" + item.resultSummary
+          + " / +1 pt"
+        );
+      });
+    }
+
     lines.push("");
     lines.push("ラウンド終了時順位");
     historyItem.ranking.forEach(function (player, index) {
@@ -749,6 +945,16 @@ function restoreGameFromSave(savedData) {
   if (!game.pendingActions) {
     game.pendingActions = [];
   }
+
+  if (!game.history) {
+    game.history = [];
+  }
+
+  game.history.forEach(function (historyItem) {
+    if (!historyItem.publicity) {
+      historyItem.publicity = [];
+    }
+  });
 
   updateRoundDisplay();
   renderRoundScreen();
@@ -868,8 +1074,28 @@ confirmCalculateButton.addEventListener("click", function () {
   showScreen(resultScreen, "result");
 });
 
+// 喧伝を確定
+confirmPromotionButton.addEventListener("click", function () {
+  applyPromotion();
+});
+
 // 次のラウンドへ
 nextRoundButton.addEventListener("click", function () {
+  const checkedPromotionBoxes = document.querySelectorAll(".promotion-checkbox:checked");
+  const currentHistory = getCurrentHistoryItem();
+
+  if (
+    checkedPromotionBoxes.length > 0
+    && currentHistory
+    && (!currentHistory.publicity || currentHistory.publicity.length === 0)
+  ) {
+    const ok = confirm("喧伝するプレイヤーが選択されていますが、まだ確定されていません。喧伝なしで進みますか？");
+
+    if (!ok) {
+      return;
+    }
+  }
+
   game.currentRound++;
 
   if (game.currentRound > game.maxRound) {
