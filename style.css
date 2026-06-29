@@ -39,47 +39,23 @@ body {
 }
 
 .app-header {
-  padding: 28px 32px;
-  border-bottom: 1px solid var(--border-soft);
-  background:
-    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.9)),
-    radial-gradient(circle at 20% 10%, rgba(125, 211, 252, 0.18), transparent 28%);
+  padding: 24px 0 10px;
 }
 
-.header-inner {
+.banner-frame {
   width: min(1200px, 96%);
   margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: 20px;
+  overflow: hidden;
+  background: #050812;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
 }
 
-.app-kicker {
-  margin: 0 0 8px;
-  color: var(--accent);
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 30px;
-  letter-spacing: 0.03em;
-}
-
-.app-lead {
-  margin: 10px 0 0;
-  color: var(--sub-text);
-}
-
-.header-badges {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+.banner-image {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .header-badges span,
@@ -97,7 +73,7 @@ body {
 
 .app-main {
   width: min(1200px, 96%);
-  margin: 28px auto 72px;
+  margin: 22px auto 72px;
 }
 
 .screen {
@@ -437,15 +413,6 @@ button:disabled {
 }
 
 @media (max-width: 900px) {
-  .header-inner {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .header-badges {
-    justify-content: flex-start;
-  }
-
   .card-grid,
   .player-name-grid {
     grid-template-columns: repeat(2, 1fr);
