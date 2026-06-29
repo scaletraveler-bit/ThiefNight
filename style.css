@@ -104,6 +104,10 @@ body {
   border-color: rgba(250, 204, 21, 0.5);
 }
 
+.discord-card {
+  border-color: rgba(125, 211, 252, 0.45);
+}
+
 .help-text {
   color: var(--sub-text);
   margin-top: 0;
@@ -124,7 +128,8 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -132,6 +137,17 @@ select {
   background: #0f172a;
   color: var(--text);
   font-size: 16px;
+}
+
+textarea {
+  font-family: "Consolas", "Menlo", "Yu Gothic", monospace;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.discord-textarea {
+  min-height: 320px;
+  white-space: pre-wrap;
 }
 
 select:disabled {
