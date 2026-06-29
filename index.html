@@ -10,7 +10,7 @@
   <header class="app-header">
     <div>
       <h1>盗賊ゲーム 運営補助ツール</h1>
-      <p>ゲームマスター専用 / Ver.0.5 入力確認と確定計算</p>
+      <p>ゲームマスター専用 / Ver.0.6 ラウンド履歴表示</p>
     </div>
   </header>
 
@@ -121,6 +121,11 @@
         <ol id="currentRankingList" class="ranking-list"></ol>
       </div>
 
+      <div class="card">
+        <h3>これまでのラウンド履歴</h3>
+        <div id="historyDisplay" class="history-list"></div>
+      </div>
+
       <div class="button-area">
         <button id="nextRoundButton" class="secondary-button">次のラウンドへ</button>
       </div>
@@ -135,6 +140,11 @@
       <div class="card final-card">
         <h3>最終順位</h3>
         <ol id="finalRankingList" class="ranking-list final-ranking"></ol>
+      </div>
+
+      <div class="card">
+        <h3>全ラウンド履歴</h3>
+        <div id="finalHistoryDisplay" class="history-list"></div>
       </div>
 
       <div class="button-area">
