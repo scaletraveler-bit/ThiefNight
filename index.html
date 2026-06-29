@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>盗賊ゲーム 運営補助ツール Ver.1.1</title>
+  <title>盗賊ゲーム 運営補助ツール Ver.1.2</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -13,7 +13,7 @@
     </div>
 
     <div class="version-strip">
-      <span>Ver.1.1 喧伝システム対応</span>
+      <span>Ver.1.2 改訂ルール対応</span>
       <span>Game Master Support Tool</span>
       <span>GitHub Pages対応</span>
     </div>
@@ -47,7 +47,6 @@
         <div class="card">
           <label for="playerCount">プレイヤー人数</label>
           <select id="playerCount">
-            <option value="3">3人</option>
             <option value="4">4人</option>
             <option value="5" selected>5人</option>
             <option value="6">6人</option>
@@ -72,7 +71,7 @@
           <h3>プレイヤー名登録</h3>
           <span class="mini-label">Players</span>
         </div>
-        <p class="help-text">未入力の場合は「プレイヤー1」のように自動で名前が入ります。</p>
+        <p class="help-text">未入力の場合は「プレイヤー1」のように自動で名前が入ります。推奨人数は5〜7名です。</p>
         <div id="playerNameInputs" class="player-name-grid"></div>
       </div>
 
@@ -82,11 +81,14 @@
           <span class="mini-label">Rules</span>
         </div>
         <ul class="rule-list">
-          <li>奪う → 対象が「貯める」なら、奪った側 +10 / 対象 -10</li>
-          <li>奪う → 対象が「守る」なら、奪った側 -5 / 守った側 +5</li>
+          <li>奪う → 対象が「貯める」なら、奪った側 +10P</li>
+          <li>奪う → 対象が「守る」なら、奪った側 -5P</li>
           <li>奪う → 対象も「奪う」なら、変動なし</li>
-          <li>貯める → 誰にも奪われなければ +5</li>
-          <li>守る → 誰にも奪われなければ変動なし</li>
+          <li>守る → 1人以上から狙われたら +5P</li>
+          <li>守る → 誰にも狙われなければ -1P</li>
+          <li>貯める → 基本 +5P</li>
+          <li>貯める → 1人以上から狙われたら追加で -10P</li>
+          <li>複数人から狙われても、「守る成功」「貯める失敗」は各1回のみ適用</li>
         </ul>
       </div>
 
@@ -97,7 +99,7 @@
         </div>
         <ul class="rule-list">
           <li>ラウンド終了後、希望者は喧伝できます。</li>
-          <li>喧伝したプレイヤーは +1 pt を得ます。</li>
+          <li>喧伝したプレイヤーは +1P を得ます。</li>
           <li>喧伝すると、そのラウンドの行動と結果概要が公開されます。</li>
           <li>喧伝では「奪う対象名」は公開しません。</li>
         </ul>
@@ -177,7 +179,7 @@
           <span class="mini-label">Promotion</span>
         </div>
         <p class="help-text">
-          喧伝するプレイヤーを選んで確定すると、そのプレイヤーに +1 pt が加算されます。
+          喧伝するプレイヤーを選んで確定すると、そのプレイヤーに +1P が加算されます。
           公開されるのは行動と結果概要のみです。
         </p>
 
