@@ -7,7 +7,6 @@
   --accent: #7dd3fc;
   --accent-strong: #38bdf8;
   --border: #2d3547;
-  --warning: #facc15;
 }
 
 * {
@@ -98,6 +97,13 @@ body {
 .help-text {
   color: var(--sub-text);
   margin-top: 0;
+}
+
+.rule-list {
+  margin: 0;
+  padding-left: 24px;
+  color: var(--sub-text);
+  line-height: 1.8;
 }
 
 label {
