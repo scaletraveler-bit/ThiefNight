@@ -1,4 +1,6 @@
-console.log("盗賊ゲーム 運営補助ツール Ver.0.6");
+console.log("盗賊ゲーム 運営補助ツール Ver.0.7");
+
+const STORAGE_KEY = "thief_game_save_v07";
 
 // 画面
 const setupScreen = document.getElementById("setupScreen");
@@ -15,6 +17,8 @@ const playerNameInputs = document.getElementById("playerNameInputs");
 
 // ボタン
 const startGameButton = document.getElementById("startGameButton");
+const resumeSavedButton = document.getElementById("resumeSavedButton");
+const deleteSavedButton = document.getElementById("deleteSavedButton");
 const checkInputButton = document.getElementById("checkInputButton");
 const backToRoundButton = document.getElementById("backToRoundButton");
 const confirmCalculateButton = document.getElementById("confirmCalculateButton");
@@ -22,6 +26,7 @@ const nextRoundButton = document.getElementById("nextRoundButton");
 const resetGameButton = document.getElementById("resetGameButton");
 
 // 表示エリア
+const saveStatusText = document.getElementById("saveStatusText");
 const roundDisplay = document.getElementById("roundDisplay");
 const roundStatusLabel = document.getElementById("roundStatusLabel");
 const actionTable = document.getElementById("actionTable");
@@ -34,20 +39,26 @@ const historyDisplay = document.getElementById("historyDisplay");
 const finalHistoryDisplay = document.getElementById("finalHistoryDisplay");
 
 // ゲーム状態
-let game = {
-  players: [],
-  currentRound: 1,
-  maxRound: 3,
-  initialPoints: 10,
-  history: [],
-  pendingActions: []
-};
+let game = createDefaultGame();
 
 const actionLabels = {
   steal: "奪う",
   guard: "守る",
   save: "貯める"
 };
+
+function createDefaultGame() {
+  return {
+    players: [],
+    currentRound: 1,
+    maxRound: 3,
+    initialPoints: 10,
+    history: [],
+    pendingActions: [],
+    currentInputs: [],
+    currentScreen: "setup"
+  };
+}
 
 // 数値入力を安全に読み取る
 function getNumber(value, fallback, min) {
@@ -64,8 +75,72 @@ function getNumber(value, fallback, min) {
   return number;
 }
 
+// 保存データを取得する
+function getSavedData() {
+  try {
+    const rawData = localStorage.getItem(STORAGE_KEY);
+
+    if (!rawData) {
+      return null;
+    }
+
+    return JSON.parse(rawData);
+  } catch (error) {
+    console.warn("保存データの読み込みに失敗しました。", error);
+    return null;
+  }
+}
+
+// ゲーム状態を保存する
+function saveGame() {
+  try {
+    const saveData = {
+      version: "0.7",
+      savedAt: new Date().toISOString(),
+      game: game
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+    updateSavePanel();
+  } catch (error) {
+    console.warn("ゲーム状態の保存に失敗しました。", error);
+  }
+}
+
+// 保存データを削除する
+function clearSavedGame() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    updateSavePanel();
+  } catch (error) {
+    console.warn("保存データの削除に失敗しました。", error);
+  }
+}
+
+// 保存データ欄の表示を更新する
+function updateSavePanel() {
+  const savedData = getSavedData();
+
+  if (!savedData || !savedData.game || !savedData.game.players || savedData.game.players.length === 0) {
+    saveStatusText.textContent = "保存データはありません。新しくゲームを開始できます。";
+    resumeSavedButton.disabled = true;
+    deleteSavedButton.disabled = true;
+    return;
+  }
+
+  const savedAt = new Date(savedData.savedAt);
+  const savedAtText = savedAt.toLocaleString("ja-JP");
+
+  saveStatusText.textContent =
+    "保存データがあります。最終保存：" + savedAtText
+    + " / 現在ラウンド：" + savedData.game.currentRound + " / " + savedData.game.maxRound;
+
+  resumeSavedButton.disabled = false;
+  deleteSavedButton.disabled = false;
+}
+
 // 指定した画面だけ表示する
-function showScreen(targetScreen) {
+function showScreen(targetScreen, screenName, shouldSave = true) {
   setupScreen.classList.remove("active");
   roundScreen.classList.remove("active");
   confirmScreen.classList.remove("active");
@@ -73,6 +148,14 @@ function showScreen(targetScreen) {
   finalScreen.classList.remove("active");
 
   targetScreen.classList.add("active");
+
+  if (screenName) {
+    game.currentScreen = screenName;
+  }
+
+  if (shouldSave && game.players.length > 0) {
+    saveGame();
+  }
 }
 
 // プレイヤー名入力欄を作る
@@ -132,6 +215,31 @@ function updateRoundDisplay() {
   roundStatusLabel.textContent = "第" + game.currentRound + "ラウンド";
 }
 
+// 現在入力中の行動を保存用に集める
+function captureCurrentInputsFromDom() {
+  const actionSelects = document.querySelectorAll(".action-select");
+
+  return Array.from(actionSelects).map(function (actionSelect) {
+    const playerId = Number(actionSelect.dataset.playerId);
+
+    const targetSelect = document.querySelector(
+      '.target-select[data-player-id="' + playerId + '"]'
+    );
+
+    return {
+      playerId: playerId,
+      action: actionSelect.value,
+      targetId: targetSelect && targetSelect.value ? Number(targetSelect.value) : null
+    };
+  });
+}
+
+// 入力中の行動を保存する
+function saveCurrentInputsFromDom() {
+  game.currentInputs = captureCurrentInputsFromDom();
+  saveGame();
+}
+
 // ラウンド画面を作る
 function renderRoundScreen() {
   actionTable.innerHTML = "";
@@ -189,6 +297,11 @@ function renderRoundScreen() {
 
     actionSelect.addEventListener("change", function () {
       updateTargetSelect(player.id);
+      saveCurrentInputsFromDom();
+    });
+
+    targetSelect.addEventListener("change", function () {
+      saveCurrentInputsFromDom();
     });
 
     row.appendChild(nameCell);
@@ -197,6 +310,36 @@ function renderRoundScreen() {
     row.appendChild(targetSelect);
 
     actionTable.appendChild(row);
+  });
+
+  applyCurrentInputsToRoundScreen();
+}
+
+// 保存されている入力内容をラウンド画面へ反映する
+function applyCurrentInputsToRoundScreen() {
+  if (!game.currentInputs || game.currentInputs.length === 0) {
+    return;
+  }
+
+  game.currentInputs.forEach(function (input) {
+    const actionSelect = document.querySelector(
+      '.action-select[data-player-id="' + input.playerId + '"]'
+    );
+
+    const targetSelect = document.querySelector(
+      '.target-select[data-player-id="' + input.playerId + '"]'
+    );
+
+    if (!actionSelect || !targetSelect) {
+      return;
+    }
+
+    actionSelect.value = input.action || "";
+    updateTargetSelect(input.playerId);
+
+    if (input.action === "steal" && input.targetId) {
+      targetSelect.value = String(input.targetId);
+    }
   });
 }
 
@@ -209,6 +352,10 @@ function updateTargetSelect(playerId) {
   const targetSelect = document.querySelector(
     '.target-select[data-player-id="' + playerId + '"]'
   );
+
+  if (!actionSelect || !targetSelect) {
+    return;
+  }
 
   if (actionSelect.value === "steal") {
     targetSelect.disabled = false;
@@ -528,24 +675,99 @@ function renderFinalResult() {
   renderHistory(finalHistoryDisplay);
 }
 
+// 保存データから復元する
+function restoreGameFromSave(savedData) {
+  game = {
+    ...createDefaultGame(),
+    ...savedData.game
+  };
+
+  if (!game.currentInputs) {
+    game.currentInputs = [];
+  }
+
+  if (!game.pendingActions) {
+    game.pendingActions = [];
+  }
+
+  updateRoundDisplay();
+  renderRoundScreen();
+  renderRanking(currentRankingList);
+
+  if (game.currentScreen === "round") {
+    showScreen(roundScreen, "round", false);
+    return;
+  }
+
+  if (game.currentScreen === "confirm") {
+    renderConfirmScreen(game.pendingActions);
+    showScreen(confirmScreen, "confirm", false);
+    return;
+  }
+
+  if (game.currentScreen === "result") {
+    const lastHistory = game.history[game.history.length - 1];
+    const logs = lastHistory ? lastHistory.logs : [];
+    renderResultScreen(logs);
+    showScreen(resultScreen, "result", false);
+    return;
+  }
+
+  if (game.currentScreen === "final") {
+    renderFinalResult();
+    showScreen(finalScreen, "final", false);
+    return;
+  }
+
+  showScreen(setupScreen, "setup", false);
+}
+
 // プレイヤー人数変更時に名前入力欄を作り直す
 playerCountInput.addEventListener("change", function () {
   createPlayerNameInputs();
 });
 
-// ゲーム開始
+// 新しくゲーム開始
 startGameButton.addEventListener("click", function () {
+  game = createDefaultGame();
+
   game.players = createPlayersFromSettings();
   game.currentRound = 1;
   game.maxRound = getNumber(roundCountInput.value, 3, 1);
   game.initialPoints = getNumber(initialPointsInput.value, 10, 0);
   game.history = [];
   game.pendingActions = [];
+  game.currentInputs = [];
+  game.currentScreen = "round";
 
   updateRoundDisplay();
   renderRoundScreen();
   renderRanking(currentRankingList);
-  showScreen(roundScreen);
+  showScreen(roundScreen, "round");
+});
+
+// 保存データから再開
+resumeSavedButton.addEventListener("click", function () {
+  const savedData = getSavedData();
+
+  if (!savedData || !savedData.game) {
+    alert("保存データがありません。");
+    updateSavePanel();
+    return;
+  }
+
+  restoreGameFromSave(savedData);
+});
+
+// 保存データを削除
+deleteSavedButton.addEventListener("click", function () {
+  const ok = confirm("保存データを削除します。現在の途中経過は復元できなくなります。よろしいですか？");
+
+  if (!ok) {
+    return;
+  }
+
+  clearSavedGame();
 });
 
 // 入力内容を確認
@@ -556,30 +778,34 @@ checkInputButton.addEventListener("click", function () {
     return;
   }
 
+  game.currentInputs = captureCurrentInputsFromDom();
   game.pendingActions = actions;
   renderConfirmScreen(actions);
-  showScreen(confirmScreen);
+  showScreen(confirmScreen, "confirm");
 });
 
 // 入力に戻る
 backToRoundButton.addEventListener("click", function () {
-  showScreen(roundScreen);
+  renderRoundScreen();
+  showScreen(roundScreen, "round");
 });
 
 // この内容で確定
 confirmCalculateButton.addEventListener("click", function () {
   if (!game.pendingActions || game.pendingActions.length === 0) {
     alert("確定する入力内容がありません。");
-    showScreen(roundScreen);
+    renderRoundScreen();
+    showScreen(roundScreen, "round");
     return;
   }
 
   const logs = calculateRoundResults(game.pendingActions);
 
   game.pendingActions = [];
+  game.currentInputs = [];
 
   renderResultScreen(logs);
-  showScreen(resultScreen);
+  showScreen(resultScreen, "result");
 });
 
 // 次のラウンドへ
@@ -588,21 +814,38 @@ nextRoundButton.addEventListener("click", function () {
 
   if (game.currentRound > game.maxRound) {
     renderFinalResult();
-    showScreen(finalScreen);
+    showScreen(finalScreen, "final");
   } else {
+    game.currentInputs = [];
+    game.pendingActions = [];
+
     updateRoundDisplay();
     renderRoundScreen();
-    showScreen(roundScreen);
+    showScreen(roundScreen, "round");
   }
 });
 
-// 新しいゲームを始める
+// 保存データを削除して新しいゲームへ
 resetGameButton.addEventListener("click", function () {
-  game.currentRound = 1;
-  game.history = [];
-  game.pendingActions = [];
-  showScreen(setupScreen);
+  clearSavedGame();
+  game = createDefaultGame();
+  createPlayerNameInputs();
+  showScreen(setupScreen, "setup", false);
+  updateSavePanel();
 });
 
 // 初期表示
 createPlayerNameInputs();
+updateSavePanel();
+
+const savedDataOnLoad = getSavedData();
+
+if (
+  savedDataOnLoad
+  && savedDataOnLoad.game
+  && savedDataOnLoad.game.players
+  && savedDataOnLoad.game.players.length > 0
+  && savedDataOnLoad.game.currentScreen !== "setup"
+) {
+  restoreGameFromSave(savedDataOnLoad);
+}
