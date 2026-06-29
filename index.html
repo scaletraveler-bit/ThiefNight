@@ -10,7 +10,7 @@
   <header class="app-header">
     <div>
       <h1>盗賊ゲーム 運営補助ツール</h1>
-      <p>ゲームマスター専用 / Ver.0.4 ポイント計算</p>
+      <p>ゲームマスター専用 / Ver.0.5 入力確認と確定計算</p>
     </div>
   </header>
 
@@ -82,13 +82,31 @@
       <div id="actionTable" class="action-table"></div>
 
       <div class="button-area">
-        <button id="calculateResultButton" class="primary-button">結果計算</button>
+        <button id="checkInputButton" class="primary-button">入力内容を確認</button>
+      </div>
+    </section>
+
+    <section id="confirmScreen" class="screen">
+      <div class="screen-header">
+        <h2>③ 入力確認</h2>
+        <span class="status-label">確定前</span>
+      </div>
+
+      <div class="card warning-card">
+        <h3>この内容で確定しますか？</h3>
+        <p class="help-text">まだポイントは計算されていません。間違いがあれば「入力に戻る」で修正できます。</p>
+        <ul id="confirmActionList" class="log-list"></ul>
+      </div>
+
+      <div class="button-area">
+        <button id="backToRoundButton" class="secondary-button">入力に戻る</button>
+        <button id="confirmCalculateButton" class="primary-button">この内容で確定</button>
       </div>
     </section>
 
     <section id="resultScreen" class="screen">
       <div class="screen-header">
-        <h2>③ 結果画面</h2>
+        <h2>④ 結果画面</h2>
         <span class="status-label">ラウンド結果</span>
       </div>
 
@@ -110,7 +128,7 @@
 
     <section id="finalScreen" class="screen">
       <div class="screen-header">
-        <h2>④ 最終結果</h2>
+        <h2>⑤ 最終結果</h2>
         <span class="status-label">ゲーム終了</span>
       </div>
 
