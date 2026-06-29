@@ -8,9 +8,18 @@
 </head>
 <body>
   <header class="app-header">
-    <div>
-      <h1>盗賊ゲーム 運営補助ツール</h1>
-      <p>ゲームマスター専用 / Ver.0.8 Discord投稿用テキスト作成</p>
+    <div class="header-inner">
+      <div>
+        <p class="app-kicker">Game Master Support Tool</p>
+        <h1>盗賊ゲーム 運営補助ツール</h1>
+        <p class="app-lead">ゲームマスター専用 / Ver.0.9 見た目調整</p>
+      </div>
+
+      <div class="header-badges">
+        <span>PC向け</span>
+        <span>自動保存</span>
+        <span>Discord出力</span>
+      </div>
     </div>
   </header>
 
@@ -18,12 +27,18 @@
 
     <section id="setupScreen" class="screen active">
       <div class="screen-header">
-        <h2>① 設定画面</h2>
+        <div>
+          <p class="screen-step">STEP 01</p>
+          <h2>設定画面</h2>
+        </div>
         <span class="status-label">準備中</span>
       </div>
 
       <div id="saveDataCard" class="card save-card">
-        <h3>保存データ</h3>
+        <div class="card-title-row">
+          <h3>保存データ</h3>
+          <span class="mini-label">Auto Save</span>
+        </div>
         <p id="saveStatusText" class="help-text">保存データを確認中です。</p>
 
         <div class="button-area save-button-area">
@@ -57,13 +72,19 @@
       </div>
 
       <div class="card">
-        <h3>プレイヤー名登録</h3>
+        <div class="card-title-row">
+          <h3>プレイヤー名登録</h3>
+          <span class="mini-label">Players</span>
+        </div>
         <p class="help-text">未入力の場合は「プレイヤー1」のように自動で名前が入ります。</p>
         <div id="playerNameInputs" class="player-name-grid"></div>
       </div>
 
       <div class="card">
-        <h3>計算ルール</h3>
+        <div class="card-title-row">
+          <h3>計算ルール</h3>
+          <span class="mini-label">Rules</span>
+        </div>
         <ul class="rule-list">
           <li>奪う → 対象が「貯める」なら、奪った側 +10 / 対象 -10</li>
           <li>奪う → 対象が「守る」なら、奪った側 -5 / 守った側 +5</li>
@@ -80,7 +101,10 @@
 
     <section id="roundScreen" class="screen">
       <div class="screen-header">
-        <h2>② ラウンド画面</h2>
+        <div>
+          <p class="screen-step">STEP 02</p>
+          <h2>ラウンド画面</h2>
+        </div>
         <span id="roundStatusLabel" class="status-label">第1ラウンド</span>
       </div>
 
@@ -98,12 +122,18 @@
 
     <section id="confirmScreen" class="screen">
       <div class="screen-header">
-        <h2>③ 入力確認</h2>
-        <span class="status-label">確定前</span>
+        <div>
+          <p class="screen-step">STEP 03</p>
+          <h2>入力確認</h2>
+        </div>
+        <span class="status-label warning-label">確定前</span>
       </div>
 
       <div class="card warning-card">
-        <h3>この内容で確定しますか？</h3>
+        <div class="card-title-row">
+          <h3>この内容で確定しますか？</h3>
+          <span class="mini-label">Confirm</span>
+        </div>
         <p class="help-text">まだポイントは計算されていません。間違いがあれば「入力に戻る」で修正できます。</p>
         <ul id="confirmActionList" class="log-list"></ul>
       </div>
@@ -116,23 +146,35 @@
 
     <section id="resultScreen" class="screen">
       <div class="screen-header">
-        <h2>④ 結果画面</h2>
+        <div>
+          <p class="screen-step">STEP 04</p>
+          <h2>結果画面</h2>
+        </div>
         <span class="status-label">ラウンド結果</span>
       </div>
 
       <div class="card">
-        <h3>今回の処理結果</h3>
+        <div class="card-title-row">
+          <h3>今回の処理結果</h3>
+          <span class="mini-label">Result</span>
+        </div>
         <p id="roundResultText" class="help-text">ここに処理結果が表示されます。</p>
         <ul id="roundLogList" class="log-list"></ul>
       </div>
 
       <div class="card">
-        <h3>現在ランキング</h3>
+        <div class="card-title-row">
+          <h3>現在ランキング</h3>
+          <span class="mini-label">Ranking</span>
+        </div>
         <ol id="currentRankingList" class="ranking-list"></ol>
       </div>
 
       <div class="card">
-        <h3>これまでのラウンド履歴</h3>
+        <div class="card-title-row">
+          <h3>これまでのラウンド履歴</h3>
+          <span class="mini-label">History</span>
+        </div>
         <div id="historyDisplay" class="history-list"></div>
       </div>
 
@@ -143,17 +185,26 @@
 
     <section id="finalScreen" class="screen">
       <div class="screen-header">
-        <h2>⑤ 最終結果</h2>
-        <span class="status-label">ゲーム終了</span>
+        <div>
+          <p class="screen-step">STEP 05</p>
+          <h2>最終結果</h2>
+        </div>
+        <span class="status-label final-label">ゲーム終了</span>
       </div>
 
       <div class="card final-card">
-        <h3>最終順位</h3>
+        <div class="card-title-row">
+          <h3>最終順位</h3>
+          <span class="mini-label">Final</span>
+        </div>
         <ol id="finalRankingList" class="ranking-list final-ranking"></ol>
       </div>
 
       <div class="card discord-card">
-        <h3>Discord投稿用テキスト</h3>
+        <div class="card-title-row">
+          <h3>Discord投稿用テキスト</h3>
+          <span class="mini-label">Discord</span>
+        </div>
         <p class="help-text">下の文章をコピーして、Discordにそのまま貼り付けできます。</p>
         <textarea id="discordResultText" class="discord-textarea" readonly></textarea>
 
@@ -163,7 +214,10 @@
       </div>
 
       <div class="card">
-        <h3>全ラウンド履歴</h3>
+        <div class="card-title-row">
+          <h3>全ラウンド履歴</h3>
+          <span class="mini-label">History</span>
+        </div>
         <div id="finalHistoryDisplay" class="history-list"></div>
       </div>
 
