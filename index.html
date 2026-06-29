@@ -10,13 +10,12 @@
   <header class="app-header">
     <div>
       <h1>盗賊ゲーム 運営補助ツール</h1>
-      <p>ゲームマスター専用 / Ver.0.2 画面切り替え</p>
+      <p>ゲームマスター専用 / Ver.0.3 設定反映</p>
     </div>
   </header>
 
   <main class="app-main">
 
-    <!-- ① 設定画面 -->
     <section id="setupScreen" class="screen active">
       <div class="screen-header">
         <h2>① 設定画面</h2>
@@ -49,16 +48,8 @@
 
       <div class="card">
         <h3>プレイヤー名登録</h3>
-        <div class="player-name-grid">
-          <input type="text" placeholder="プレイヤー1" />
-          <input type="text" placeholder="プレイヤー2" />
-          <input type="text" placeholder="プレイヤー3" />
-          <input type="text" placeholder="プレイヤー4" />
-          <input type="text" placeholder="プレイヤー5" />
-          <input type="text" placeholder="プレイヤー6" />
-          <input type="text" placeholder="プレイヤー7" />
-          <input type="text" placeholder="プレイヤー8" />
-        </div>
+        <p class="help-text">未入力の場合は「プレイヤー1」のように自動で名前が入ります。</p>
+        <div id="playerNameInputs" class="player-name-grid"></div>
       </div>
 
       <div class="button-area">
@@ -66,7 +57,6 @@
       </div>
     </section>
 
-    <!-- ② ラウンド画面 -->
     <section id="roundScreen" class="screen">
       <div class="screen-header">
         <h2>② ラウンド画面</h2>
@@ -78,79 +68,28 @@
         <p>各プレイヤーの行動を入力してください。</p>
       </div>
 
-      <div class="action-table">
-        <div class="action-row action-head">
-          <span>プレイヤー</span>
-          <span>現在ポイント</span>
-          <span>行動</span>
-          <span>対象</span>
-        </div>
-
-        <div class="action-row">
-          <span>プレイヤー1</span>
-          <span>10 pt</span>
-          <select>
-            <option>奪う</option>
-            <option>守る</option>
-            <option>貯める</option>
-          </select>
-          <select>
-            <option>対象を選択</option>
-          </select>
-        </div>
-
-        <div class="action-row">
-          <span>プレイヤー2</span>
-          <span>10 pt</span>
-          <select>
-            <option>奪う</option>
-            <option>守る</option>
-            <option>貯める</option>
-          </select>
-          <select>
-            <option>対象を選択</option>
-          </select>
-        </div>
-
-        <div class="action-row">
-          <span>プレイヤー3</span>
-          <span>10 pt</span>
-          <select>
-            <option>奪う</option>
-            <option>守る</option>
-            <option>貯める</option>
-          </select>
-          <select>
-            <option>対象を選択</option>
-          </select>
-        </div>
-      </div>
+      <div id="actionTable" class="action-table"></div>
 
       <div class="button-area">
-        <button class="secondary-button">入力確認</button>
-        <button id="calculateResultButton" class="primary-button">結果計算</button>
+        <button id="calculateResultButton" class="primary-button">入力内容を確認</button>
       </div>
     </section>
 
-    <!-- ③ 結果画面 -->
     <section id="resultScreen" class="screen">
       <div class="screen-header">
         <h2>③ 結果画面</h2>
-        <span class="status-label">ラウンド結果</span>
+        <span class="status-label">ラウンド確認</span>
       </div>
 
       <div class="card">
-        <h3>今回の処理結果</h3>
-        <p>ここに「誰が誰を奪ったか」「守られたか」「貯めたか」などの結果を表示します。</p>
+        <h3>今回の入力内容</h3>
+        <p id="roundResultText" class="help-text">ここに入力内容が表示されます。</p>
+        <ul id="roundLogList" class="log-list"></ul>
       </div>
 
       <div class="card">
         <h3>現在ランキング</h3>
-        <ol class="ranking-list">
-          <li>プレイヤー1：12 pt</li>
-          <li>プレイヤー2：10 pt</li>
-          <li>プレイヤー3：8 pt</li>
-        </ol>
+        <ol id="currentRankingList" class="ranking-list"></ol>
       </div>
 
       <div class="button-area">
@@ -158,7 +97,6 @@
       </div>
     </section>
 
-    <!-- ④ 最終結果 -->
     <section id="finalScreen" class="screen">
       <div class="screen-header">
         <h2>④ 最終結果</h2>
@@ -167,11 +105,7 @@
 
       <div class="card final-card">
         <h3>最終順位</h3>
-        <ol class="ranking-list final-ranking">
-          <li>🥇 プレイヤー1：18 pt</li>
-          <li>🥈 プレイヤー3：14 pt</li>
-          <li>🥉 プレイヤー2：9 pt</li>
-        </ol>
+        <ol id="finalRankingList" class="ranking-list final-ranking"></ol>
       </div>
 
       <div class="button-area">
