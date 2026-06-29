@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>盗賊ゲーム 運営補助ツール Ver.1.0</title>
+  <title>盗賊ゲーム 運営補助ツール Ver.1.1</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -13,7 +13,7 @@
     </div>
 
     <div class="version-strip">
-      <span>Ver.1.0 正式版</span>
+      <span>Ver.1.1 喧伝システム対応</span>
       <span>Game Master Support Tool</span>
       <span>GitHub Pages対応</span>
     </div>
@@ -90,6 +90,19 @@
         </ul>
       </div>
 
+      <div class="card promotion-card">
+        <div class="card-title-row">
+          <h3>喧伝ルール</h3>
+          <span class="mini-label">Promotion</span>
+        </div>
+        <ul class="rule-list">
+          <li>ラウンド終了後、希望者は喧伝できます。</li>
+          <li>喧伝したプレイヤーは +1 pt を得ます。</li>
+          <li>喧伝すると、そのラウンドの行動と結果概要が公開されます。</li>
+          <li>喧伝では「奪う対象名」は公開しません。</li>
+        </ul>
+      </div>
+
       <div class="button-area">
         <button id="startGameButton" class="primary-button">新しくゲーム開始</button>
       </div>
@@ -156,6 +169,24 @@
         </div>
         <p id="roundResultText" class="help-text">ここに処理結果が表示されます。</p>
         <ul id="roundLogList" class="log-list"></ul>
+      </div>
+
+      <div class="card promotion-card">
+        <div class="card-title-row">
+          <h3>喧伝システム</h3>
+          <span class="mini-label">Promotion</span>
+        </div>
+        <p class="help-text">
+          喧伝するプレイヤーを選んで確定すると、そのプレイヤーに +1 pt が加算されます。
+          公開されるのは行動と結果概要のみです。
+        </p>
+
+        <div id="promotionOptions" class="promotion-options"></div>
+        <div id="promotionResult" class="promotion-result"></div>
+
+        <div class="button-area">
+          <button id="confirmPromotionButton" class="primary-button">喧伝を確定</button>
+        </div>
       </div>
 
       <div class="card">
