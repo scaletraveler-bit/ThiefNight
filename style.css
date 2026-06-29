@@ -1,0 +1,190 @@
+:root {
+  --bg: #10131a;
+  --panel: #181d27;
+  --panel-light: #202635;
+  --text: #f2f4f8;
+  --sub-text: #aeb7c7;
+  --accent: #7dd3fc;
+  --accent-strong: #38bdf8;
+  --danger: #fb7185;
+  --border: #2d3547;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app-header {
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #111827, #1e293b);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.app-header p {
+  margin: 8px 0 0;
+  color: var(--sub-text);
+}
+
+.app-main {
+  width: min(1200px, 96%);
+  margin: 24px auto 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.screen {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.screen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.screen-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.status-label {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(125, 211, 252, 0.12);
+  color: var(--accent);
+  font-size: 14px;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: var(--panel-light);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sub-text);
+  font-size: 14px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0f172a;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.player-name-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.button-area {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.primary-button {
+  background: var(--accent-strong);
+  color: #082f49;
+}
+
+.secondary-button {
+  background: #334155;
+  color: var(--text);
+}
+
+.round-info {
+  color: var(--sub-text);
+  margin-bottom: 16px;
+}
+
+.round-info strong {
+  color: var(--text);
+}
+
+.action-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: var(--panel-light);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.action-head {
+  color: var(--sub-text);
+  font-size: 14px;
+  background: transparent;
+  border: none;
+}
+
+.ranking-list {
+  margin: 0;
+  padding-left: 24px;
+  line-height: 2;
+}
+
+.final-card {
+  border-color: rgba(125, 211, 252, 0.45);
+}
+
+.final-ranking {
+  font-size: 20px;
+}
