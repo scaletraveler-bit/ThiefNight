@@ -1,6 +1,6 @@
-console.log("盗賊ゲーム 運営補助ツール Ver.0.8");
+console.log("盗賊ゲーム 運営補助ツール Ver.1.0");
 
-const STORAGE_KEY = "thief_game_save_v07";
+const STORAGE_KEY = "thief_game_save_v10";
 
 // 画面
 const setupScreen = document.getElementById("setupScreen");
@@ -97,7 +97,7 @@ function getSavedData() {
 function saveGame() {
   try {
     const saveData = {
-      version: "0.8",
+      version: "1.0",
       savedAt: new Date().toISOString(),
       game: game
     };
