@@ -1,6 +1,6 @@
-console.log("盗賊ゲーム 運営補助ツール Ver.1.1");
+console.log("盗賊ゲーム 運営補助ツール Ver.1.2");
 
-const STORAGE_KEY = "thief_game_save_v11";
+const STORAGE_KEY = "thief_game_save_v12";
 
 // 画面
 const setupScreen = document.getElementById("setupScreen");
@@ -65,7 +65,6 @@ function createDefaultGame() {
   };
 }
 
-// 数値入力を安全に読み取る
 function getNumber(value, fallback, min) {
   const number = Number(value);
 
@@ -80,7 +79,6 @@ function getNumber(value, fallback, min) {
   return number;
 }
 
-// 保存データを取得する
 function getSavedData() {
   try {
     const rawData = localStorage.getItem(STORAGE_KEY);
@@ -96,11 +94,10 @@ function getSavedData() {
   }
 }
 
-// ゲーム状態を保存する
 function saveGame() {
   try {
     const saveData = {
-      version: "1.1",
+      version: "1.2",
       savedAt: new Date().toISOString(),
       game: game
     };
@@ -112,7 +109,6 @@ function saveGame() {
   }
 }
 
-// 保存データを削除する
 function clearSavedGame() {
   try {
     localStorage.removeItem(STORAGE_KEY);
@@ -122,7 +118,6 @@ function clearSavedGame() {
   }
 }
 
-// 保存データ欄の表示を更新する
 function updateSavePanel() {
   const savedData = getSavedData();
 
@@ -144,7 +139,6 @@ function updateSavePanel() {
   deleteSavedButton.disabled = false;
 }
 
-// 指定した画面だけ表示する
 function showScreen(targetScreen, screenName, shouldSave = true) {
   setupScreen.classList.remove("active");
   roundScreen.classList.remove("active");
@@ -163,9 +157,8 @@ function showScreen(targetScreen, screenName, shouldSave = true) {
   }
 }
 
-// プレイヤー名入力欄を作る
 function createPlayerNameInputs() {
-  const count = getNumber(playerCountInput.value, 5, 3);
+  const count = getNumber(playerCountInput.value, 5, 4);
 
   const oldInputs = playerNameInputs.querySelectorAll("input");
   const oldNames = Array.from(oldInputs).map(function (input) {
@@ -185,9 +178,8 @@ function createPlayerNameInputs() {
   }
 }
 
-// 設定画面の内容からプレイヤーデータを作る
 function createPlayersFromSettings() {
-  const count = getNumber(playerCountInput.value, 5, 3);
+  const count = getNumber(playerCountInput.value, 5, 4);
   const initialPoints = getNumber(initialPointsInput.value, 10, 0);
 
   const players = [];
@@ -207,20 +199,17 @@ function createPlayersFromSettings() {
   return players;
 }
 
-// プレイヤーをIDで探す
 function findPlayer(playerId) {
   return game.players.find(function (player) {
     return player.id === Number(playerId);
   });
 }
 
-// ラウンド表示を更新する
 function updateRoundDisplay() {
   roundDisplay.textContent = game.currentRound + " / " + game.maxRound;
   roundStatusLabel.textContent = "第" + game.currentRound + "ラウンド";
 }
 
-// 現在入力中の行動を保存用に集める
 function captureCurrentInputsFromDom() {
   const actionSelects = document.querySelectorAll(".action-select");
 
@@ -239,13 +228,11 @@ function captureCurrentInputsFromDom() {
   });
 }
 
-// 入力中の行動を保存する
 function saveCurrentInputsFromDom() {
   game.currentInputs = captureCurrentInputsFromDom();
   saveGame();
 }
 
-// ラウンド画面を作る
 function renderRoundScreen() {
   actionTable.innerHTML = "";
 
@@ -320,7 +307,6 @@ function renderRoundScreen() {
   applyCurrentInputsToRoundScreen();
 }
 
-// 保存されている入力内容をラウンド画面へ反映する
 function applyCurrentInputsToRoundScreen() {
   if (!game.currentInputs || game.currentInputs.length === 0) {
     return;
@@ -348,7 +334,6 @@ function applyCurrentInputsToRoundScreen() {
   });
 }
 
-// 行動が「奪う」の時だけ対象選択を有効にする
 function updateTargetSelect(playerId) {
   const actionSelect = document.querySelector(
     '.action-select[data-player-id="' + playerId + '"]'
@@ -370,7 +355,6 @@ function updateTargetSelect(playerId) {
   }
 }
 
-// 入力された行動を集める
 function getRoundActions() {
   return game.players.map(function (player) {
     const actionSelect = document.querySelector(
@@ -395,7 +379,6 @@ function getRoundActions() {
   });
 }
 
-// 行動入力に問題がないか確認する
 function validateRoundActions(actions) {
   for (const action of actions) {
     if (!action.action) {
@@ -412,7 +395,6 @@ function validateRoundActions(actions) {
   return true;
 }
 
-// 入力確認画面を作る
 function renderConfirmScreen(actions) {
   confirmActionList.innerHTML = "";
 
@@ -429,18 +411,22 @@ function renderConfirmScreen(actions) {
   });
 }
 
-// ラウンド結果を計算する
+function addDelta(deltaMap, playerId, amount) {
+  const current = deltaMap.get(playerId) || 0;
+  deltaMap.set(playerId, current + amount);
+}
+
 function calculateRoundResults(actions) {
   const logs = [];
-
+  const deltaMap = new Map();
   const actionMap = new Map();
+  const stealCountByTarget = new Map();
 
   actions.forEach(function (action) {
     action.resultSummary = "";
     actionMap.set(action.playerId, action);
+    deltaMap.set(action.playerId, 0);
   });
-
-  const stealCountByTarget = new Map();
 
   actions.forEach(function (action) {
     if (action.action === "steal") {
@@ -454,33 +440,29 @@ function calculateRoundResults(actions) {
       return;
     }
 
-    const thief = findPlayer(action.playerId);
-    const target = findPlayer(action.targetId);
     const targetAction = actionMap.get(action.targetId);
 
-    if (!thief || !target || !targetAction) {
+    if (!targetAction) {
       return;
     }
 
     if (targetAction.action === "save") {
-      thief.points += 10;
-      target.points -= 10;
-      action.resultSummary = "奪うことに成功（+10 pt）";
+      addDelta(deltaMap, action.playerId, 10);
+      action.resultSummary = "奪うことに成功（+10P）";
 
       logs.push(
-        thief.name + " は " + target.name + " から奪うことに成功。"
-        + thief.name + " +10 pt / " + target.name + " -10 pt"
+        action.playerName + " は " + targetAction.playerName + " から奪うことに成功。"
+        + action.playerName + " +10P"
       );
     }
 
     if (targetAction.action === "guard") {
-      thief.points -= 5;
-      target.points += 5;
-      action.resultSummary = "守られて失敗（-5 pt）";
+      addDelta(deltaMap, action.playerId, -5);
+      action.resultSummary = "守られて失敗（-5P）";
 
       logs.push(
-        thief.name + " は " + target.name + " を狙ったが、守られた。"
-        + thief.name + " -5 pt / " + target.name + " +5 pt"
+        action.playerName + " は " + targetAction.playerName + " を狙ったが、守られた。"
+        + action.playerName + " -5P"
       );
     }
 
@@ -488,37 +470,55 @@ function calculateRoundResults(actions) {
       action.resultSummary = "相手も奪う行動だったため変動なし";
 
       logs.push(
-        thief.name + " は " + target.name + " を狙ったが、相手も奪う行動だったため変動なし。"
+        action.playerName + " は " + targetAction.playerName + " を狙ったが、相手も奪う行動だったため変動なし。"
       );
     }
   });
 
   actions.forEach(function (action) {
-    const player = findPlayer(action.playerId);
     const stealCount = stealCountByTarget.get(action.playerId) || 0;
 
-    if (!player) {
-      return;
+    if (action.action === "save") {
+      addDelta(deltaMap, action.playerId, 5);
+
+      if (stealCount > 0) {
+        addDelta(deltaMap, action.playerId, -10);
+        action.resultSummary = "貯めたが奪われた（+5P / -10P / 合計 -5P）";
+
+        logs.push(
+          action.playerName + " は貯めたが、奪うの対象になった。"
+          + action.playerName + " +5P / -10P（合計 -5P）"
+        );
+      } else {
+        action.resultSummary = "安全に貯めた（+5P）";
+        logs.push(action.playerName + " は安全に貯めた。+5P");
+      }
     }
 
-    if (action.action === "save" && stealCount === 0) {
-      player.points += 5;
-      action.resultSummary = "安全に貯めた（+5 pt）";
-      logs.push(player.name + " は安全に貯めた。+5 pt");
-    }
+    if (action.action === "guard") {
+      if (stealCount > 0) {
+        addDelta(deltaMap, action.playerId, 5);
+        action.resultSummary = "返り討ちに成功（+5P）";
 
-    if (action.action === "save" && stealCount > 0) {
-      action.resultSummary = "奪われた（-" + (10 * stealCount) + " pt）";
-    }
+        logs.push(
+          action.playerName + " は守りに成功した。"
+          + action.playerName + " +5P"
+        );
+      } else {
+        addDelta(deltaMap, action.playerId, -1);
+        action.resultSummary = "誰にも狙われず空振り（-1P）";
 
-    if (action.action === "guard" && stealCount === 0) {
-      action.resultSummary = "誰にも狙われず変動なし";
-      logs.push(player.name + " は守ったが、誰にも狙われなかった。変動なし。");
+        logs.push(
+          action.playerName + " は守ったが、誰にも狙われなかった。"
+          + action.playerName + " -1P"
+        );
+      }
     }
+  });
 
-    if (action.action === "guard" && stealCount > 0) {
-      action.resultSummary = "防衛成功（+" + (5 * stealCount) + " pt）";
-    }
+  game.players.forEach(function (player) {
+    const delta = deltaMap.get(player.id) || 0;
+    player.points += delta;
   });
 
   if (logs.length === 0) {
@@ -545,14 +545,12 @@ function calculateRoundResults(actions) {
   return logs;
 }
 
-// 現在ラウンドの履歴を取得する
 function getCurrentHistoryItem() {
   return game.history.find(function (historyItem) {
     return historyItem.round === game.currentRound;
   });
 }
 
-// 結果画面を作る
 function renderResultScreen(logs) {
   roundResultText.textContent =
     "第" + game.currentRound + "ラウンドの処理結果です。";
@@ -576,7 +574,6 @@ function renderResultScreen(logs) {
   }
 }
 
-// 喧伝パネルを表示する
 function renderPromotionPanel() {
   promotionOptions.innerHTML = "";
   promotionResult.innerHTML = "";
@@ -609,7 +606,7 @@ function renderPromotionPanel() {
       li.textContent =
         item.playerName + " が喧伝しました。行動：" + item.actionLabel
         + " / 結果：" + item.resultSummary
-        + " / 喧伝報酬：+1 pt";
+        + " / 喧伝報酬：+1P";
       list.appendChild(li);
     });
 
@@ -647,7 +644,6 @@ function renderPromotionPanel() {
   });
 }
 
-// 喧伝を確定する
 function applyPromotion() {
   const historyItem = getCurrentHistoryItem();
 
@@ -707,7 +703,6 @@ function applyPromotion() {
   saveGame();
 }
 
-// 順位順に並べたプレイヤー一覧を返す
 function getSortedPlayers() {
   return [...game.players].sort(function (a, b) {
     if (b.points !== a.points) {
@@ -718,7 +713,6 @@ function getSortedPlayers() {
   });
 }
 
-// ランキングを表示する
 function renderRanking(listElement) {
   const sortedPlayers = getSortedPlayers();
 
@@ -726,12 +720,11 @@ function renderRanking(listElement) {
 
   sortedPlayers.forEach(function (player) {
     const li = document.createElement("li");
-    li.textContent = player.name + "：" + player.points + " pt";
+    li.textContent = player.name + "：" + player.points + "P";
     listElement.appendChild(li);
   });
 }
 
-// 履歴を表示する
 function renderHistory(containerElement) {
   containerElement.innerHTML = "";
 
@@ -811,7 +804,7 @@ function renderHistory(containerElement) {
         li.textContent =
           item.playerName + " が喧伝。行動：" + item.actionLabel
           + " / 結果：" + item.resultSummary
-          + " / +1 pt";
+          + " / +1P";
         publicityList.appendChild(li);
       });
 
@@ -831,7 +824,7 @@ function renderHistory(containerElement) {
 
     historyItem.ranking.forEach(function (player) {
       const li = document.createElement("li");
-      li.textContent = player.name + "：" + player.points + " pt";
+      li.textContent = player.name + "：" + player.points + "P";
       rankingList.appendChild(li);
     });
 
@@ -842,7 +835,6 @@ function renderHistory(containerElement) {
   });
 }
 
-// Discord投稿用テキストを作る
 function buildDiscordResultText() {
   const sortedPlayers = getSortedPlayers();
   const medals = ["🥇", "🥈", "🥉"];
@@ -854,7 +846,7 @@ function buildDiscordResultText() {
 
   sortedPlayers.forEach(function (player, index) {
     const medal = medals[index] || "・";
-    lines.push(medal + " " + (index + 1) + "位　" + player.name + "：" + player.points + " pt");
+    lines.push(medal + " " + (index + 1) + "位　" + player.name + "：" + player.points + "P");
   });
 
   lines.push("");
@@ -888,7 +880,7 @@ function buildDiscordResultText() {
           "・" + item.playerName + " が喧伝"
           + " / 行動：" + item.actionLabel
           + " / 結果：" + item.resultSummary
-          + " / +1 pt"
+          + " / +1P"
         );
       });
     }
@@ -896,7 +888,7 @@ function buildDiscordResultText() {
     lines.push("");
     lines.push("ラウンド終了時順位");
     historyItem.ranking.forEach(function (player, index) {
-      lines.push((index + 1) + "位　" + player.name + "：" + player.points + " pt");
+      lines.push((index + 1) + "位　" + player.name + "：" + player.points + "P");
     });
   });
 
@@ -907,12 +899,10 @@ function buildDiscordResultText() {
   return lines.join("\n");
 }
 
-// Discord投稿用テキストを表示する
 function renderDiscordText() {
   discordResultText.value = buildDiscordResultText();
 }
 
-// 最終結果を表示する
 function renderFinalResult() {
   const sortedPlayers = getSortedPlayers();
 
@@ -923,7 +913,7 @@ function renderFinalResult() {
   sortedPlayers.forEach(function (player, index) {
     const li = document.createElement("li");
     const medal = medals[index] || "　";
-    li.textContent = medal + " " + player.name + "：" + player.points + " pt";
+    li.textContent = medal + " " + player.name + "：" + player.points + "P";
     finalRankingList.appendChild(li);
   });
 
@@ -931,7 +921,6 @@ function renderFinalResult() {
   renderHistory(finalHistoryDisplay);
 }
 
-// 保存データから復元する
 function restoreGameFromSave(savedData) {
   game = {
     ...createDefaultGame(),
@@ -988,12 +977,10 @@ function restoreGameFromSave(savedData) {
   showScreen(setupScreen, "setup", false);
 }
 
-// プレイヤー人数変更時に名前入力欄を作り直す
 playerCountInput.addEventListener("change", function () {
   createPlayerNameInputs();
 });
 
-// 新しくゲーム開始
 startGameButton.addEventListener("click", function () {
   game = createDefaultGame();
 
@@ -1012,7 +999,6 @@ startGameButton.addEventListener("click", function () {
   showScreen(roundScreen, "round");
 });
 
-// 保存データから再開
 resumeSavedButton.addEventListener("click", function () {
   const savedData = getSavedData();
 
@@ -1025,7 +1011,6 @@ resumeSavedButton.addEventListener("click", function () {
   restoreGameFromSave(savedData);
 });
 
-// 保存データを削除
 deleteSavedButton.addEventListener("click", function () {
   const ok = confirm("保存データを削除します。現在の途中経過は復元できなくなります。よろしいですか？");
 
@@ -1036,7 +1021,6 @@ deleteSavedButton.addEventListener("click", function () {
   clearSavedGame();
 });
 
-// 入力内容を確認
 checkInputButton.addEventListener("click", function () {
   const actions = getRoundActions();
 
@@ -1050,13 +1034,11 @@ checkInputButton.addEventListener("click", function () {
   showScreen(confirmScreen, "confirm");
 });
 
-// 入力に戻る
 backToRoundButton.addEventListener("click", function () {
   renderRoundScreen();
   showScreen(roundScreen, "round");
 });
 
-// この内容で確定
 confirmCalculateButton.addEventListener("click", function () {
   if (!game.pendingActions || game.pendingActions.length === 0) {
     alert("確定する入力内容がありません。");
@@ -1074,12 +1056,10 @@ confirmCalculateButton.addEventListener("click", function () {
   showScreen(resultScreen, "result");
 });
 
-// 喧伝を確定
 confirmPromotionButton.addEventListener("click", function () {
   applyPromotion();
 });
 
-// 次のラウンドへ
 nextRoundButton.addEventListener("click", function () {
   const checkedPromotionBoxes = document.querySelectorAll(".promotion-checkbox:checked");
   const currentHistory = getCurrentHistoryItem();
@@ -1111,7 +1091,6 @@ nextRoundButton.addEventListener("click", function () {
   }
 });
 
-// Discord投稿用テキストをコピー
 copyDiscordTextButton.addEventListener("click", function () {
   const text = discordResultText.value;
 
@@ -1135,7 +1114,6 @@ copyDiscordTextButton.addEventListener("click", function () {
     });
 });
 
-// 保存データを削除して新しいゲームへ
 resetGameButton.addEventListener("click", function () {
   clearSavedGame();
   game = createDefaultGame();
