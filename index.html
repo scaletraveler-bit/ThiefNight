@@ -10,7 +10,7 @@
   <header class="app-header">
     <div>
       <h1>盗賊ゲーム 運営補助ツール</h1>
-      <p>ゲームマスター専用 / Ver.0.7 オートセーブ</p>
+      <p>ゲームマスター専用 / Ver.0.8 Discord投稿用テキスト作成</p>
     </div>
   </header>
 
@@ -150,6 +150,16 @@
       <div class="card final-card">
         <h3>最終順位</h3>
         <ol id="finalRankingList" class="ranking-list final-ranking"></ol>
+      </div>
+
+      <div class="card discord-card">
+        <h3>Discord投稿用テキスト</h3>
+        <p class="help-text">下の文章をコピーして、Discordにそのまま貼り付けできます。</p>
+        <textarea id="discordResultText" class="discord-textarea" readonly></textarea>
+
+        <div class="button-area">
+          <button id="copyDiscordTextButton" class="primary-button">Discord用テキストをコピー</button>
+        </div>
       </div>
 
       <div class="card">
