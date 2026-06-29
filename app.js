@@ -1,4 +1,4 @@
-console.log("盗賊ゲーム 運営補助ツール Ver.0.7");
+console.log("盗賊ゲーム 運営補助ツール Ver.0.8");
 
 const STORAGE_KEY = "thief_game_save_v07";
 
@@ -24,6 +24,7 @@ const backToRoundButton = document.getElementById("backToRoundButton");
 const confirmCalculateButton = document.getElementById("confirmCalculateButton");
 const nextRoundButton = document.getElementById("nextRoundButton");
 const resetGameButton = document.getElementById("resetGameButton");
+const copyDiscordTextButton = document.getElementById("copyDiscordTextButton");
 
 // 表示エリア
 const saveStatusText = document.getElementById("saveStatusText");
@@ -37,6 +38,7 @@ const currentRankingList = document.getElementById("currentRankingList");
 const finalRankingList = document.getElementById("finalRankingList");
 const historyDisplay = document.getElementById("historyDisplay");
 const finalHistoryDisplay = document.getElementById("finalHistoryDisplay");
+const discordResultText = document.getElementById("discordResultText");
 
 // ゲーム状態
 let game = createDefaultGame();
@@ -95,7 +97,7 @@ function getSavedData() {
 function saveGame() {
   try {
     const saveData = {
-      version: "0.7",
+      version: "0.8",
       savedAt: new Date().toISOString(),
       game: game
     };
@@ -657,6 +659,63 @@ function renderHistory(containerElement) {
   });
 }
 
+// Discord投稿用テキストを作る
+function buildDiscordResultText() {
+  const sortedPlayers = getSortedPlayers();
+  const medals = ["🥇", "🥈", "🥉"];
+
+  const lines = [];
+
+  lines.push("【盗賊ゲーム 最終結果】");
+  lines.push("");
+
+  sortedPlayers.forEach(function (player, index) {
+    const medal = medals[index] || "・";
+    lines.push(medal + " " + (index + 1) + "位　" + player.name + "：" + player.points + " pt");
+  });
+
+  lines.push("");
+  lines.push("――――――――――");
+  lines.push("【ラウンド履歴】");
+
+  game.history.forEach(function (historyItem) {
+    lines.push("");
+    lines.push("■ 第" + historyItem.round + "ラウンド");
+
+    lines.push("行動");
+    historyItem.actions.forEach(function (action) {
+      if (action.action === "steal") {
+        lines.push("・" + action.playerName + "：" + action.actionLabel + " → " + action.targetName);
+      } else {
+        lines.push("・" + action.playerName + "：" + action.actionLabel);
+      }
+    });
+
+    lines.push("");
+    lines.push("処理結果");
+    historyItem.logs.forEach(function (log) {
+      lines.push("・" + log);
+    });
+
+    lines.push("");
+    lines.push("ラウンド終了時順位");
+    historyItem.ranking.forEach(function (player, index) {
+      lines.push((index + 1) + "位　" + player.name + "：" + player.points + " pt");
+    });
+  });
+
+  lines.push("");
+  lines.push("――――――――――");
+  lines.push("運営：ゲームマスター");
+
+  return lines.join("\n");
+}
+
+// Discord投稿用テキストを表示する
+function renderDiscordText() {
+  discordResultText.value = buildDiscordResultText();
+}
+
 // 最終結果を表示する
 function renderFinalResult() {
   const sortedPlayers = getSortedPlayers();
@@ -672,6 +731,7 @@ function renderFinalResult() {
     finalRankingList.appendChild(li);
   });
 
+  renderDiscordText();
   renderHistory(finalHistoryDisplay);
 }
 
@@ -823,6 +883,30 @@ nextRoundButton.addEventListener("click", function () {
     renderRoundScreen();
     showScreen(roundScreen, "round");
   }
+});
+
+// Discord投稿用テキストをコピー
+copyDiscordTextButton.addEventListener("click", function () {
+  const text = discordResultText.value;
+
+  if (!text) {
+    alert("コピーするテキストがありません。");
+    return;
+  }
+
+  navigator.clipboard.writeText(text)
+    .then(function () {
+      copyDiscordTextButton.textContent = "コピーしました";
+
+      setTimeout(function () {
+        copyDiscordTextButton.textContent = "Discord用テキストをコピー";
+      }, 1500);
+    })
+    .catch(function () {
+      discordResultText.select();
+      document.execCommand("copy");
+      alert("テキストをコピーしました。");
+    });
 });
 
 // 保存データを削除して新しいゲームへ
