@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>盗賊ゲーム 運営補助ツール</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>盗賊ゲーム 運営補助ツール</h1>
+      <p>ゲームマスター専用 / Ver.0.1 画面モック</p>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- ① 設定画面 -->
+    <section class="screen">
+      <div class="screen-header">
+        <h2>① 設定画面</h2>
+        <span class="status-label">準備中</span>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <label for="playerCount">プレイヤー人数</label>
+          <select id="playerCount">
+            <option>3人</option>
+            <option>4人</option>
+            <option selected>5人</option>
+            <option>6人</option>
+            <option>7人</option>
+            <option>8人</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <label for="initialPoints">初期ポイント</label>
+          <input id="initialPoints" type="number" value="10" />
+        </div>
+
+        <div class="card">
+          <label for="roundCount">ラウンド数</label>
+          <input id="roundCount" type="number" value="3" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>プレイヤー名登録</h3>
+        <div class="player-name-grid">
+          <input type="text" placeholder="プレイヤー1" />
+          <input type="text" placeholder="プレイヤー2" />
+          <input type="text" placeholder="プレイヤー3" />
+          <input type="text" placeholder="プレイヤー4" />
+          <input type="text" placeholder="プレイヤー5" />
+          <input type="text" placeholder="プレイヤー6" />
+          <input type="text" placeholder="プレイヤー7" />
+          <input type="text" placeholder="プレイヤー8" />
+        </div>
+      </div>
+
+      <div class="button-area">
+        <button class="primary-button">ゲーム開始</button>
+      </div>
+    </section>
+
+    <!-- ② ラウンド画面 -->
+    <section class="screen">
+      <div class="screen-header">
+        <h2>② ラウンド画面</h2>
+        <span class="status-label">第1ラウンド</span>
+      </div>
+
+      <div class="round-info">
+        <p>現在のラウンド：<strong>1 / 3</strong></p>
+        <p>各プレイヤーの行動を入力してください。</p>
+      </div>
+
+      <div class="action-table">
+        <div class="action-row action-head">
+          <span>プレイヤー</span>
+          <span>現在ポイント</span>
+          <span>行動</span>
+          <span>対象</span>
+        </div>
+
+        <div class="action-row">
+          <span>プレイヤー1</span>
+          <span>10 pt</span>
+          <select>
+            <option>奪う</option>
+            <option>守る</option>
+            <option>貯める</option>
+          </select>
+          <select>
+            <option>対象を選択</option>
+          </select>
+        </div>
+
+        <div class="action-row">
+          <span>プレイヤー2</span>
+          <span>10 pt</span>
+          <select>
+            <option>奪う</option>
+            <option>守る</option>
+            <option>貯める</option>
+          </select>
+          <select>
+            <option>対象を選択</option>
+          </select>
+        </div>
+
+        <div class="action-row">
+          <span>プレイヤー3</span>
+          <span>10 pt</span>
+          <select>
+            <option>奪う</option>
+            <option>守る</option>
+            <option>貯める</option>
+          </select>
+          <select>
+            <option>対象を選択</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="button-area">
+        <button class="secondary-button">入力確認</button>
+        <button class="primary-button">結果計算</button>
+      </div>
+    </section>
+
+    <!-- ③ 結果画面 -->
+    <section class="screen">
+      <div class="screen-header">
+        <h2>③ 結果画面</h2>
+        <span class="status-label">ラウンド結果</span>
+      </div>
+
+      <div class="card">
+        <h3>今回の処理結果</h3>
+        <p>ここに「誰が誰を奪ったか」「守られたか」「貯めたか」などの結果を表示します。</p>
+      </div>
+
+      <div class="card">
+        <h3>現在ランキング</h3>
+        <ol class="ranking-list">
+          <li>プレイヤー1：12 pt</li>
+          <li>プレイヤー2：10 pt</li>
+          <li>プレイヤー3：8 pt</li>
+        </ol>
+      </div>
+
+      <div class="button-area">
+        <button class="secondary-button">次のラウンドへ</button>
+      </div>
+    </section>
+
+    <!-- ④ 最終結果 -->
+    <section class="screen">
+      <div class="screen-header">
+        <h2>④ 最終結果</h2>
+        <span class="status-label">ゲーム終了</span>
+      </div>
+
+      <div class="card final-card">
+        <h3>最終順位</h3>
+        <ol class="ranking-list final-ranking">
+          <li>🥇 プレイヤー1：18 pt</li>
+          <li>🥈 プレイヤー3：14 pt</li>
+          <li>🥉 プレイヤー2：9 pt</li>
+        </ol>
+      </div>
+
+      <div class="button-area">
+        <button class="secondary-button">新しいゲームを始める</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
